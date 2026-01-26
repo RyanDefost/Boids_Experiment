@@ -1,10 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// How would they work?
-/// 
-/// 
-/// </summary>
 public class Agent : MonoBehaviour
 {
     [SerializeField] private float speed = 1;

@@ -17,19 +17,7 @@ public class AgentManager : MonoBehaviour
     private void Start()
     {
         gridSize = 6;
-
         CreateAgent(this.agentAmount);
-
-        var sceneAgents = FindObjectsOfType<Agent>();
-        foreach (var agent in sceneAgents)
-        {
-            var gridPositionX = Mathf.Floor(agent.transform.position.x / gridSize);
-            var gridPositionY = Mathf.Floor(agent.transform.position.y / gridSize);
-
-            this.agents.Add(agent, new Vector2(gridPositionX, gridPositionY));
-        }
-
-        this.agentAmount -= this.agents.Count;
     }
 
     // Update is called once per frame
@@ -58,8 +46,13 @@ public class AgentManager : MonoBehaviour
                 0
             );
 
-            Instantiate(agentObject, randomPosition, transform.rotation);
-            //agents.Add(agentObject.GetComponent<Agent>());
+            var currentObject = Instantiate(agentObject, randomPosition, transform.rotation);
+            var currentAgent = currentObject.GetComponent<Agent>();
+
+            var gridPositionX = Mathf.Floor(currentAgent.transform.position.x / gridSize);
+            var gridPositionY = Mathf.Floor(currentAgent.transform.position.y / gridSize);
+
+            this.agents.Add(currentAgent, new Vector2(gridPositionX, gridPositionY));
         }
     }
 }
