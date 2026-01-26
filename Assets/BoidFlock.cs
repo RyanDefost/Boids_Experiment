@@ -41,6 +41,8 @@ public class BoidFlock : MonoBehaviour
     private Boid[] agents;
     private Boid currentBoid;
 
+    private BoidObstacle[] obstacles;
+
     //
     [SerializeField] private float cohesionFactor = 0.0005f;
     [SerializeField] private float avoidanceFactor = 0.05f;
@@ -66,6 +68,8 @@ public class BoidFlock : MonoBehaviour
     {
         agents = new Boid[agentAmount];
         CreateAgent(this.agentAmount);
+
+        obstacles = FindObjectsOfType<BoidObstacle>();
     }
 
     // Update is called once per frame
@@ -73,12 +77,12 @@ public class BoidFlock : MonoBehaviour
     {
         for (int i = 0; i < agents.Length; i++)
         {
-
             currentBoid = agents[i];
 
             BoidLogic();
             LimitSpeed();
             CheckBounds();
+            AvoidObstacles();
 
             currentBoid.gameObject.transform.position += (Vector3)currentBoid.Velocity * currentBoid.Speed * Time.deltaTime;
             currentBoid.Position = currentBoid.gameObject.transform.position;
@@ -195,6 +199,21 @@ public class BoidFlock : MonoBehaviour
 
         //SEPERATION
         currentBoid.Velocity += closePos * avoidanceFactor;
+    }
+
+    private void AvoidObstacles()
+    {
+        foreach (var obstacle in obstacles) // BOIDS PASS TROUGH THE RIGHT SIDE.
+        {                                   // THEY ALSO ONLY MOVE AWAY AT THE EDGE OF THE OBJECT INSTEAD OF FULLY AVOIDING IT.
+            Vector2 nextStep = (Vector3)currentBoid.Velocity * currentBoid.Speed * Time.deltaTime;
+
+            if (obstacle.Collider.bounds.Contains(currentBoid.Position))
+            {
+                currentBoid.Velocity += (currentBoid.Position - nextStep) * 0.1f;
+                print(currentBoid);
+            }
+        }
+
     }
 
     private void LimitSpeed()

@@ -18,6 +18,8 @@ public class AgentManager : MonoBehaviour
     {
         gridSize = 6;
         CreateAgent(this.agentAmount);
+
+
     }
 
     // Update is called once per frame
