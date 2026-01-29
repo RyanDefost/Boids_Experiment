@@ -4,8 +4,8 @@ public struct Boid
 {
     public Vector2 Position;
 
-    public GameObject gameObject;
-    public SpriteRenderer renderer;
+    public GameObject GameObject;
+    public SpriteRenderer Renderer;
 
     public Vector2 GridPosition;
 
@@ -14,88 +14,93 @@ public struct Boid
 
     public Color TeamColor;
 
-    public Boid(Vector2 position, Vector2 gridPosition, Color teamColor, Sprite sprite, Vector2 velocity)
+    public Boid(Vector2 position, float gridSize, Color teamColor, Sprite sprite, Vector2 velocity)
     {
-        this.gameObject = new GameObject();
-        this.renderer = this.gameObject.AddComponent<SpriteRenderer>();
-        renderer.sprite = sprite;
+        GameObject = new GameObject();
+        Renderer = GameObject.AddComponent<SpriteRenderer>();
+        Renderer.sprite = sprite;
 
-        this.gameObject.transform.position = position;
-        this.Position = position;
+        GameObject.transform.position = position;
+        Position = position;
 
-        this.TeamColor = teamColor;
-        renderer.color = this.TeamColor;
+        TeamColor = teamColor;
+        Renderer.color = teamColor;
 
-        this.GridPosition = gridPosition;
+        GridPosition = new Vector2(
+            Mathf.Floor(position.x / gridSize),
+            Mathf.Floor(position.y / gridSize)
+        );
 
-        this.Velocity = velocity;
-        this.Speed = 10;
+        Velocity = velocity;
+        Speed = 10;
     }
 }
 
 public class BoidFlock : MonoBehaviour
 {
-    [SerializeField] private int agentAmount = 0;
-    [SerializeField] private Vector2 agentArea = new Vector2(40, 20);
-    public int gridSize = 6;
+    [Header("Flock Settings")]
+    [SerializeField] private int _boidAmount = 0;
 
-    private Boid[] agents;
-    private Boid currentBoid;
+    [SerializeField] private Vector2 _outerBounds = new Vector2(40, 20);
+    [SerializeField] private int _gridSize = 6;
 
-    private BoidObstacle[] obstacles;
-
-    //
-    [SerializeField] private float cohesionFactor = 0.0005f;
-    [SerializeField] private float avoidanceFactor = 0.05f;
-    [SerializeField] private float AlignmentFactor = 0.05f;
-    [SerializeField] private float turnFactor = 0.1f;
+    [Space, Header("Boid Settings")]
+    [SerializeField] private float _cohesionFactor = 0.0005f;
+    [SerializeField] private float _avoidanceFactor = 0.05f;
+    [SerializeField] private float _alignmentFactor = 0.05f;
+    [SerializeField] private float _turnFactor = 0.1f;
+    [Space]
+    [SerializeField] private float _maxSpeed = 1;
+    [SerializeField] private float _minSpeed = 1;
 
     [Space]
-    [SerializeField] private int minDistance = 1;
-    [SerializeField] private int maxDistance = 5;
+    [SerializeField] private int _minDistance = 1;
+    [SerializeField] private int _maxDistance = 5;
 
     [Space]
-    [SerializeField] private Sprite sprite;
+    [SerializeField] private Sprite _sprite;
 
-    private int NeighbourCount = 0;
-    private Vector2 averageCenter = Vector2.zero;
-    private Vector2 averageDiraction = Vector2.zero;
-    private Vector2 closePos = Vector2.zero;
-
-    private Vector2 outerBounds = new Vector2(40, 20);
-
+    private Boid[] _boids;
+    private Boid _currentBoid;
 
     private void OnEnable()
     {
-        agents = new Boid[agentAmount];
-        CreateAgent(this.agentAmount);
+        _boids = new Boid[_boidAmount];
+        CreateAgent(_boidAmount);
+    }
 
-        obstacles = FindObjectsOfType<BoidObstacle>();
+    private void OnDisable()
+    {
+        foreach (Boid agent in _boids)
+        {
+            Destroy(agent.GameObject);
+        }
+        _boids = null;
     }
 
     // Update is called once per frame
     private void Update()
     {
-        for (int i = 0; i < agents.Length; i++)
+        for (int i = 0; i < _boids.Length; i++)
         {
-            currentBoid = agents[i];
+            _currentBoid = _boids[i];
 
             BoidLogic();
             LimitSpeed();
             CheckBounds();
             AvoidObstacles();
 
-            currentBoid.gameObject.transform.position += (Vector3)currentBoid.Velocity * currentBoid.Speed * Time.deltaTime;
-            currentBoid.Position = currentBoid.gameObject.transform.position;
+            _currentBoid.GameObject.transform.position += (Vector3)_currentBoid.Velocity * _currentBoid.Speed * Time.deltaTime;
+            _currentBoid.Position = _currentBoid.GameObject.transform.position;
 
             SetRotation();
 
-            currentBoid.GridPosition = new Vector2(
-                Mathf.Floor(currentBoid.Position.x / gridSize),
-                Mathf.Floor(currentBoid.Position.y / gridSize)
+            _currentBoid.GridPosition = new Vector2(
+                Mathf.Floor(_currentBoid.Position.x / _gridSize),
+                Mathf.Floor(_currentBoid.Position.y / _gridSize)
             );
 
-            agents[i] = currentBoid; //Saves the current values.
+            _boids[i] = _currentBoid;
         }
     }
 
@@ -105,114 +110,110 @@ public class BoidFlock : MonoBehaviour
 
         for (int i = 0; i < amount; i++)
         {
-            //Set random start direction
-            var randomDiraction = new Vector2(
-                Random.Range(-1, 2),
-                Random.Range(-1, 2)
-            );
-            if (randomDiraction == Vector2.zero) // FIX
-            {
-                randomDiraction = Vector2.one;
-            }
-
-            var randomPosition = new Vector3(
-                Random.Range(-agentArea.x, agentArea.x),
-                Random.Range(-agentArea.y, agentArea.y),
+            // Set random startPosition.
+            Vector2 randomPosition = new Vector3(
+                Random.Range(-_outerBounds.x, _outerBounds.x),
+                Random.Range(-_outerBounds.y, _outerBounds.y),
                 0
             );
 
-            var gridPositionX = Mathf.Floor(randomPosition.x / gridSize);
-            var gridPositionY = Mathf.Floor(randomPosition.y / gridSize);
-            var gridPosition = new Vector2(gridPositionX, gridPositionY);
+            // Set random start direction.
+            Vector2 randomDiraction = new Vector2(
+                Random.Range(-1, 2),
+                Random.Range(-1, 2)
+            );
+            randomDiraction = randomDiraction == Vector2.zero ? Vector2.one : randomDiraction;
 
-            var currentAgent = new Boid(
+            // Set random color.
+            Color color = randomPosition.y > 0 ? Color.blue : Color.yellow;
+
+            // CREATE BOID.
+            _boids[i] = new Boid(
                 randomPosition,
-                gridPosition,
-                Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f),
-                sprite,
+                _gridSize,
+                color, //Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f),
+                _sprite,
                 randomDiraction
             );
-
-            this.agents[i] = currentAgent;
         }
     }
 
-    private void SetRotation()
+    private void SetRotation() // NOT MY CODE (forgot to note down credits)
     {
-        Vector3 diff = (currentBoid.Position + currentBoid.Velocity) - currentBoid.Position;
+        Vector3 diff = (_currentBoid.Position + _currentBoid.Velocity) - _currentBoid.Position;
         diff.Normalize();
         float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-        currentBoid.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
+        _currentBoid.GameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
     }
 
     private void BoidLogic()
     {
-        NeighbourCount = 0;
-        averageCenter = Vector2.zero;
-        averageDiraction = Vector2.zero;
-        closePos = Vector2.zero;
+        var neighbourCount = 0;
+        var averageCenter = Vector2.zero;
+        var averageDiraction = Vector2.zero;
+        var avoidCenter = Vector2.zero;
 
-        for (int i = 0; i < this.agents.Length; i++)
+        for (int i = 0; i < _boids.Length; i++)
         {
-            var agent = this.agents[i];
+            Boid boid = _boids[i];
 
-            if (agent.GridPosition != currentBoid.GridPosition) continue;
+            if (boid.GridPosition != _currentBoid.GridPosition) continue;
 
-            var currentDistance = Vector2.Distance(currentBoid.Position, agent.Position);
+            float currentDistance = Vector2.Distance(_currentBoid.Position, boid.Position);
 
             //AVOIDANCE OTHER
-            if (currentDistance <= minDistance && currentBoid.TeamColor != agent.TeamColor)
+            if (currentDistance <= _minDistance && _currentBoid.TeamColor != boid.TeamColor)
             {
-                closePos += (currentBoid.Position - agent.Position);
+                avoidCenter += (_currentBoid.Position - boid.Position);
 
-                currentBoid.TeamColor = agent.TeamColor;
-                currentBoid.renderer.color = currentBoid.TeamColor;
+                _currentBoid.TeamColor = boid.TeamColor;
+                _currentBoid.Renderer.color = _currentBoid.TeamColor;
 
                 continue;
             }
 
-            if (currentDistance < maxDistance)
+            if (currentDistance < _maxDistance)
             {
                 //COHESION
-                averageCenter += agent.Position;
+                averageCenter += boid.Position;
                 //ALIGNMNENT
-                averageDiraction += agent.Velocity;
+                averageDiraction += boid.Velocity;
 
-                NeighbourCount++;
+                neighbourCount++;
             }
 
             //SEPERATION
-            if (currentDistance <= minDistance)
-                closePos += currentBoid.Position - agent.Position;
+            if (currentDistance <= _minDistance)
+                avoidCenter += _currentBoid.Position - boid.Position;
         }
 
-        if (NeighbourCount > 0)
+        if (neighbourCount > 0)
         {
             //COHESION
-            averageCenter = averageCenter / NeighbourCount;
-            currentBoid.Velocity.x += (averageCenter.x - currentBoid.Position.x) * cohesionFactor;
-            currentBoid.Velocity.y += (averageCenter.y - currentBoid.Position.y) * cohesionFactor;
+            averageCenter = averageCenter / neighbourCount;
+            _currentBoid.Velocity.x += (averageCenter.x - _currentBoid.Position.x) * _cohesionFactor;
+            _currentBoid.Velocity.y += (averageCenter.y - _currentBoid.Position.y) * _cohesionFactor;
 
             //ALIGNMENT
-            averageDiraction = averageDiraction / NeighbourCount;
-            currentBoid.Velocity += (averageDiraction - currentBoid.Velocity) * AlignmentFactor;
+            averageDiraction = averageDiraction / neighbourCount;
+            _currentBoid.Velocity += (averageDiraction - _currentBoid.Velocity) * _alignmentFactor;
         }
 
         //SEPERATION
-        currentBoid.Velocity += closePos * avoidanceFactor;
+        _currentBoid.Velocity += avoidCenter * _avoidanceFactor;
     }
 
     private void AvoidObstacles()
     {
-        Vector2 diraction = (currentBoid.Velocity * currentBoid.Speed * Time.deltaTime).normalized;
-        RaycastHit2D hit = Physics2D.Raycast(currentBoid.Position, diraction, 12);
+        Vector2 diraction = (_currentBoid.Velocity * _currentBoid.Speed * Time.deltaTime).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(_currentBoid.Position, diraction, 12);
 
         if (hit)
         {
             // Fail-save move outside of obstacle.
             if (hit.distance <= 0)
             {
-                currentBoid.Velocity += (currentBoid.Position - diraction);
+                _currentBoid.Velocity += (_currentBoid.Position - diraction);
                 return;
             }
 
@@ -223,58 +224,57 @@ public class BoidFlock : MonoBehaviour
             // Set avoid direction.
             if (roundDirX <= 0)
             {
-                currentBoid.Velocity.x += turnAvoid;
+                _currentBoid.Velocity.x += turnAvoid;
             }
             else if (roundDirX >= 0)
             {
-                currentBoid.Velocity.x -= turnAvoid;
+                _currentBoid.Velocity.x -= turnAvoid;
             }
             if (roundDirY <= 0)
             {
-                currentBoid.Velocity.y += turnAvoid;
+                _currentBoid.Velocity.y += turnAvoid;
             }
             else if (roundDirY >= 0)
             {
-                currentBoid.Velocity.y -= turnAvoid;
+                _currentBoid.Velocity.y -= turnAvoid;
             }
         }
     }
 
     private void LimitSpeed()
     {
-        float speedLimit = 1;
-        float speedMin = 1;
+        Vector2 velocity = _currentBoid.Velocity;
 
-        var speed = Mathf.Sqrt(currentBoid.Velocity.x * currentBoid.Velocity.x + currentBoid.Velocity.y * currentBoid.Velocity.y);
-        if (speed > speedLimit)
+        float speed = Mathf.Sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+        if (speed > _maxSpeed)
         {
-            currentBoid.Velocity = (currentBoid.Velocity / speed) * speedLimit;
+            _currentBoid.Velocity = (velocity / speed) * _maxSpeed;
         }
-        else if (speed < speedMin)
+        else if (speed < _minSpeed)
         {
-            currentBoid.Velocity = (currentBoid.Velocity / speed) * speedMin;
+            _currentBoid.Velocity = (velocity / speed) * _minSpeed;
         }
     }
 
     private void CheckBounds()
     {
-        Vector2 agentPosition = currentBoid.Position;
+        Vector2 position = _currentBoid.Position;
 
-        if (agentPosition.x < outerBounds.x) // UP
+        if (position.x < _outerBounds.x)
         {
-            currentBoid.Velocity.x += turnFactor;
+            _currentBoid.Velocity.x += _turnFactor;
         }
-        if (agentPosition.x > -outerBounds.x) // DOWN
+        if (position.x > -_outerBounds.x)
         {
-            currentBoid.Velocity.x -= turnFactor;
+            _currentBoid.Velocity.x -= _turnFactor;
         }
-        if (agentPosition.y < outerBounds.y) // RIGHT
+        if (position.y < _outerBounds.y)
         {
-            currentBoid.Velocity.y += turnFactor;
+            _currentBoid.Velocity.y += _turnFactor;
         }
-        if (agentPosition.y > -outerBounds.y) // LEFT
+        if (position.y > -_outerBounds.y)
         {
-            currentBoid.Velocity.y -= turnFactor;
+            _currentBoid.Velocity.y -= _turnFactor;
         }
     }
 }

@@ -654,16 +654,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bef09a481a0fae4b8ec337f249c7a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentAmount: 1000
-  agentArea: {x: 50, y: 40}
-  gridSize: 6
-  cohesionFactor: 0.0005
-  avoidanceFactor: 0.1
-  AlignmentFactor: 0.1
-  turnFactor: 0.1
-  minDistance: 1
-  maxDistance: 5
-  sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  _boidAmount: 1000
+  _outerBounds: {x: 40, y: 30}
+  _gridSize: 6
+  _cohesionFactor: 0.0005
+  _avoidanceFactor: 0.1
+  _alignmentFactor: 0.1
+  _turnFactor: 0.1
+  _maxSpeed: 1
+  _minSpeed: 1
+  _minDistance: 1
+  _maxDistance: 5
+  _sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -894,7 +896,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2.5, y: 1.35}
+  m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
 --- !u!212 &1153693849
 SpriteRenderer:
