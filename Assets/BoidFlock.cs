@@ -1,41 +1,5 @@
 using UnityEngine;
 
-public struct Boid
-{
-    public Vector2 Position;
-
-    public GameObject GameObject;
-    public SpriteRenderer Renderer;
-
-    public Vector2 GridPosition;
-
-    public Vector2 Velocity;
-    public float Speed;
-
-    public Color TeamColor;
-
-    public Boid(Vector2 position, float gridSize, Color teamColor, Sprite sprite, Vector2 velocity)
-    {
-        GameObject = new GameObject();
-        Renderer = GameObject.AddComponent<SpriteRenderer>();
-        Renderer.sprite = sprite;
-
-        GameObject.transform.position = position;
-        Position = position;
-
-        TeamColor = teamColor;
-        Renderer.color = teamColor;
-
-        GridPosition = new Vector2(
-            Mathf.Floor(position.x / gridSize),
-            Mathf.Floor(position.y / gridSize)
-        );
-
-        Velocity = velocity;
-        Speed = 10;
-    }
-}
-
 public class BoidFlock : MonoBehaviour
 {
     [Header("Flock Settings")]
@@ -66,7 +30,7 @@ public class BoidFlock : MonoBehaviour
     private void OnEnable()
     {
         _boids = new Boid[_boidAmount];
-        CreateAgent(_boidAmount);
+        CreateBoids(_boidAmount);
     }
 
     private void OnDisable()
@@ -78,7 +42,6 @@ public class BoidFlock : MonoBehaviour
         _boids = null;
     }
 
-    // Update is called once per frame
     private void Update()
     {
         for (int i = 0; i < _boids.Length; i++)
@@ -104,7 +67,11 @@ public class BoidFlock : MonoBehaviour
         }
     }
 
-    private void CreateAgent(int amount)
+    /// <summary>
+    /// Creates the given amount of boids in the level.
+    /// </summary>
+    /// <param name="amount">amount of boids that are spawned.</param>
+    private void CreateBoids(int amount)
     {
         if (amount <= 0) return;
 
@@ -138,6 +105,9 @@ public class BoidFlock : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Rotates the _currentBoid towards its velocity direction.
+    /// </summary>
     private void SetRotation() // NOT MY CODE (forgot to note down credits)
     {
         Vector3 diff = (_currentBoid.Position + _currentBoid.Velocity) - _currentBoid.Position;
@@ -146,6 +116,9 @@ public class BoidFlock : MonoBehaviour
         _currentBoid.GameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
     }
 
+    /// <summary>
+    /// Applies the boid rules to the _currentBoid.
+    /// </summary>
     private void BoidLogic()
     {
         var neighbourCount = 0;
@@ -203,6 +176,9 @@ public class BoidFlock : MonoBehaviour
         _currentBoid.Velocity += avoidCenter * _avoidanceFactor;
     }
 
+    /// <summary>
+    /// Avoids the bounds of an obstacle if moving towards it.
+    /// </summary>
     private void AvoidObstacles()
     {
         Vector2 diraction = (_currentBoid.Velocity * _currentBoid.Speed * Time.deltaTime).normalized;
@@ -241,6 +217,9 @@ public class BoidFlock : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets and limits the amount of velocity based on the min / max speed.
+    /// </summary>
     private void LimitSpeed()
     {
         Vector2 velocity = _currentBoid.Velocity;
@@ -256,6 +235,9 @@ public class BoidFlock : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Keeps the _currentBoid inside the given bounds of the level.
+    /// </summary>
     private void CheckBounds()
     {
         Vector2 position = _currentBoid.Position;
