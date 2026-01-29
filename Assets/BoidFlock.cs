@@ -13,6 +13,7 @@ public class BoidFlock : MonoBehaviour
     [SerializeField] private float _avoidanceFactor = 0.05f;
     [SerializeField] private float _alignmentFactor = 0.05f;
     [SerializeField] private float _turnFactor = 0.1f;
+
     [Space]
     [SerializeField] private float _maxSpeed = 1;
     [SerializeField] private float _minSpeed = 1;
