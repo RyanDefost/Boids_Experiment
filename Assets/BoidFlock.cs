@@ -3,6 +3,7 @@ using UnityEngine;
 public struct Boid
 {
     public Vector2 Position;
+
     public GameObject gameObject;
     public SpriteRenderer renderer;
 
@@ -203,23 +204,46 @@ public class BoidFlock : MonoBehaviour
 
     private void AvoidObstacles()
     {
-        foreach (var obstacle in obstacles) // BOIDS PASS TROUGH THE RIGHT SIDE.
-        {                                   // THEY ALSO ONLY MOVE AWAY AT THE EDGE OF THE OBJECT INSTEAD OF FULLY AVOIDING IT.
-            Vector2 nextStep = (Vector3)currentBoid.Velocity * currentBoid.Speed * Time.deltaTime;
+        Vector2 diraction = (currentBoid.Velocity * currentBoid.Speed * Time.deltaTime).normalized;
+        RaycastHit2D hit = Physics2D.Raycast(currentBoid.Position, diraction, 12);
 
-            if (obstacle.Collider.bounds.Contains(currentBoid.Position))
+        if (hit)
+        {
+            // Fail-save move outside of obstacle.
+            if (hit.distance <= 0)
             {
-                currentBoid.Velocity += (currentBoid.Position - nextStep) * 0.1f;
-                print(currentBoid);
+                currentBoid.Velocity += (currentBoid.Position - diraction);
+                return;
+            }
+
+            float turnAvoid = hit.distance < 1 ? 0.9f : 0.4f;
+            float roundDirX = Mathf.Round(diraction.x);
+            float roundDirY = Mathf.Round(diraction.y);
+
+            // Set avoid direction.
+            if (roundDirX <= 0)
+            {
+                currentBoid.Velocity.x += turnAvoid;
+            }
+            else if (roundDirX >= 0)
+            {
+                currentBoid.Velocity.x -= turnAvoid;
+            }
+            if (roundDirY <= 0)
+            {
+                currentBoid.Velocity.y += turnAvoid;
+            }
+            else if (roundDirY >= 0)
+            {
+                currentBoid.Velocity.y -= turnAvoid;
             }
         }
-
     }
 
     private void LimitSpeed()
     {
-        var speedLimit = 1;
-        var speedMin = 1;
+        float speedLimit = 1;
+        float speedMin = 1;
 
         var speed = Mathf.Sqrt(currentBoid.Velocity.x * currentBoid.Velocity.x + currentBoid.Velocity.y * currentBoid.Velocity.y);
         if (speed > speedLimit)
@@ -236,19 +260,19 @@ public class BoidFlock : MonoBehaviour
     {
         Vector2 agentPosition = currentBoid.Position;
 
-        if (agentPosition.x < outerBounds.x)
+        if (agentPosition.x < outerBounds.x) // UP
         {
             currentBoid.Velocity.x += turnFactor;
         }
-        if (agentPosition.x > -outerBounds.x)
+        if (agentPosition.x > -outerBounds.x) // DOWN
         {
             currentBoid.Velocity.x -= turnFactor;
         }
-        if (agentPosition.y < outerBounds.y)
+        if (agentPosition.y < outerBounds.y) // RIGHT
         {
             currentBoid.Velocity.y += turnFactor;
         }
-        if (agentPosition.y > -outerBounds.y)
+        if (agentPosition.y > -outerBounds.y) // LEFT
         {
             currentBoid.Velocity.y -= turnFactor;
         }
