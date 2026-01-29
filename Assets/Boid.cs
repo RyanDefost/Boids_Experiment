@@ -16,7 +16,7 @@ public struct Boid
 
     public Boid(Vector2 position, float gridSize, Color teamColor, Sprite sprite, Vector2 velocity)
     {
-        GameObject = new GameObject();\
+        GameObject = new GameObject();
         Renderer = GameObject.AddComponent<SpriteRenderer>();
         Renderer.sprite = sprite;
 
