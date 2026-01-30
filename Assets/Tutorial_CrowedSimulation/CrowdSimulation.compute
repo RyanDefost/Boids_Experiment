@@ -6,6 +6,8 @@ struct CrowdAgent
     float2 position;
     float2 velocity;
     float2 target;
+    float2 gridPosition;
+    float4 teamColor;
     float maxSpeed;
 };
 
@@ -14,6 +16,108 @@ RWStructuredBuffer<CrowdAgent> agents;
 int agentCount;
 float deltaTime;
 
+float _cohesionFactor;
+float _alignmentFactor;
+float _avoidanceFactor;
+
+int _maxDistance;
+int _minDistance;
+
+float2 _outerBounds;
+
+CrowdAgent agent;
+
+void Logic()
+{
+    int neighbourCount = 0;
+    float2 averageCenter = { 0, 0 };
+    float2 averageDiraction = { 0, 0 };
+    float2 avoidCenter = { 0, 0 };
+
+    _maxDistance = 5;
+    _minDistance = 1;
+    
+    for (int i = 0; i < agentCount; i++)
+    {
+        CrowdAgent otherAgent = agents[i];
+
+        if (agent.gridPosition.x != otherAgent.gridPosition.x 
+            || agent.gridPosition.y != otherAgent.gridPosition.y)
+            continue;
+
+        float currentDistance = distance(agent.position, otherAgent.position);
+        
+        if (currentDistance < _maxDistance)
+        {
+            //COHESION
+            averageCenter += otherAgent.position;
+            //ALIGNMNENT
+            averageDiraction += otherAgent.velocity;
+
+            neighbourCount++;
+        }
+
+        //SEPERATION
+        if (currentDistance <= _minDistance)
+            avoidCenter += agent.position - otherAgent.position;
+    }
+
+    if (neighbourCount > 0)
+    {
+        //COHESION
+        averageCenter = averageCenter / neighbourCount;
+        agent.velocity.x += (averageCenter.x - agent.position.x) * _cohesionFactor;
+        agent.velocity.y += (averageCenter.y - agent.position.y) * _cohesionFactor;
+
+        //ALIGNMENT
+        averageDiraction = averageDiraction / neighbourCount;
+        agent.velocity += (averageDiraction - agent.velocity) * _alignmentFactor;
+    }
+
+    //SEPERATION
+    agent.velocity += avoidCenter * _avoidanceFactor;
+}
+
+void LimitSpeed()
+{
+    float2 velocity = agent.velocity;
+    int _maxSpeed = 1;
+    int _minSpeed = 1;
+    
+    float speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+    if (speed > _maxSpeed)
+    {
+        agent.velocity = (velocity / speed) * _maxSpeed;
+    }
+    else if (speed < _minSpeed)
+    {
+        agent.velocity = (velocity / speed) * _minSpeed;
+    }
+}
+
+void CheckBounds()
+{
+    float2 position = agent.position;
+
+    if (position.x < _outerBounds.x)
+    {
+        agent.velocity.x += 0.1f;
+    }
+    if (position.x > -_outerBounds.x)
+    {
+        agent.velocity.x -= 0.1f;
+    }
+    if (position.y < _outerBounds.y)
+    {
+        agent.velocity.y += 0.1f;
+    }
+    if (position.y > -_outerBounds.y)
+    {
+        agent.velocity.y -= 0.1f;
+    }
+}
+
+
 [numthreads(256, 1, 1)]
 void MoveAgents(uint3 id : SV_DispatchThreadID)
 {
@@ -21,22 +125,21 @@ void MoveAgents(uint3 id : SV_DispatchThreadID)
     
     if (index >= agentCount) return;
     
-    CrowdAgent agent = agents[index];
+    agent = agents[index];
     
-    float2 toTarget = agent.target - agent.position;
-    float distance = length(toTarget);
+    //
+    Logic();
+    LimitSpeed();
+    CheckBounds();
+    //
     
-    if (distance > 0.1)
-    {
-        float2 desired = normalize(toTarget) * agent.maxSpeed;
-        agent.velocity = lerp(agent.velocity, desired, 0.05);
-    }
-    else
-    {
-        agent.velocity - float2(0.0, 0.0);
-    }
+    agent.position += agent.velocity * 10 * deltaTime;
     
-    agent.position += agent.velocity * deltaTime;
-    
+    agent.gridPosition = float2(
+        floor(agent.position.x / 6),
+        floor(agent.position.y / 6)
+    );
+
     agents[index] = agent;
 };
+

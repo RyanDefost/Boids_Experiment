@@ -13,6 +13,8 @@ Shader "Crowd/InstancedAgent" {
                 float2 position;
                 float2 velocity;
                 float2 target;
+                float2 gridPosition;
+                float4 teamColor;
                 float maxSpeed;
             };
             
@@ -29,7 +31,7 @@ Shader "Crowd/InstancedAgent" {
             
             Varyings vert(Attributes v) {
                 CrowdAgent agent = agents[v.instanceID];
-                
+
                 float3 positionOS = v.positionOS;
                 positionOS.x += agent.position.x;
                 positionOS.y += agent.position.y;
