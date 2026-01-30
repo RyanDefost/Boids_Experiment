@@ -47,11 +47,11 @@ void Logic()
         float currentDistance = distance(agent.position, otherAgent.position);
         
         //AVOIDANCE OTHER
-        if (currentDistance <= _minDistance && all(agent.teamColor.x != otherAgent.teamColor.x))
+        if (currentDistance <= _minDistance && all(agent.teamColor != otherAgent.teamColor))
         {
             avoidCenter += (agent.position - otherAgent.position);
-
-            agent.teamColor = otherAgent.teamColor;
+                                                                    //DOESNT SEEM TO WORK
+            agent.teamColor = otherAgent.teamColor;                 //OTHER COLORS DON'T IGNORE EACHOTHER!
             continue;
         }
         
