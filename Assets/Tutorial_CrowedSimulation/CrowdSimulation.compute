@@ -40,12 +40,20 @@ void Logic()
     for (int i = 0; i < agentCount; i++)
     {
         CrowdAgent otherAgent = agents[i];
-
-        if (agent.gridPosition.x != otherAgent.gridPosition.x 
-            || agent.gridPosition.y != otherAgent.gridPosition.y)
+        
+        if (all(agent.gridPosition != otherAgent.gridPosition))
             continue;
-
+        
         float currentDistance = distance(agent.position, otherAgent.position);
+        
+        //AVOIDANCE OTHER
+        if (currentDistance <= _minDistance && all(agent.teamColor.x != otherAgent.teamColor.x))
+        {
+            avoidCenter += (agent.position - otherAgent.position);
+
+            agent.teamColor = otherAgent.teamColor;
+            continue;
+        }
         
         if (currentDistance < _maxDistance)
         {
@@ -81,7 +89,7 @@ void Logic()
 void LimitSpeed()
 {
     float2 velocity = agent.velocity;
-    int _maxSpeed = 1;
+    int _maxSpeed = 5;
     int _minSpeed = 1;
     
     float speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y);

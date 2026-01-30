@@ -27,6 +27,7 @@ Shader "Crowd/InstancedAgent" {
             
             struct Varyings {
                 float4 positionCS : SV_POSITION;
+                float4 teamColor : TEXCOORD0;
             };
             
             Varyings vert(Attributes v) {
@@ -38,11 +39,14 @@ Shader "Crowd/InstancedAgent" {
                 
                 Varyings o;
                 o.positionCS = TransformObjectToHClip(positionOS);
+                o.teamColor = agent.teamColor;
                 return o;
             }
             
-            half4 frag() : SV_Target { 
-                return half4(1,1,1,1);
+            half4 frag(Varyings i) : SV_Target { 
+                
+                half3 color = half3(i.teamColor.x, i.teamColor.y, i.teamColor.z);
+                return half4(color, 1);
             }
             ENDHLSL
         }

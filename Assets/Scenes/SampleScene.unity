@@ -832,12 +832,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfcc41fd7c8b6304694aa8cfd724b1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 50000
-  worldSize: 150
+  agentCount: 10000
+  worldSize: 100
   _cohesionFactor: 0.0005
   _alignmentFactor: 0.1
   _avoidanceFactor: 0.1
-  _outerBounds: {x: 150, y: 150}
+  _outerBounds: {x: 100, y: 100}
   agentMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   agentMaterial: {fileID: 2100000, guid: bda1d85491248424fb594f2c6699e2ad, type: 2}
   crowdShader: {fileID: 7200000, guid: d095780406ad73f4d9761bdc66e25658, type: 3}

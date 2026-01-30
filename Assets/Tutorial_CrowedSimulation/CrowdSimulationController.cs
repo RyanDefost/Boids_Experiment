@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
+using Unity.Mathematics;
 using UnityEngine;
-
 
 public class CrowdSimulationController : MonoBehaviour
 {
@@ -84,6 +84,7 @@ public class CrowdSimulationController : MonoBehaviour
         crowdShader.SetInt(AgentCountID, agentCount);
         crowdShader.SetBuffer(moveKernel, AgentsID, agentBuffer);
 
+        //Settings
         crowdShader.SetFloat(CohesionFactorID, _cohesionFactor);
         crowdShader.SetFloat(AlignmentFactorID, _alignmentFactor);
         crowdShader.SetFloat(AvoidanceFactorID, _avoidanceFactor);
@@ -97,11 +98,11 @@ public class CrowdSimulationController : MonoBehaviour
         var agents = new CrowdAgent[agentCount];
         for (int i = 0; i < agentCount; i++)
         {
-            var newPosition = Random.insideUnitCircle * worldSize;
+            var newPosition = UnityEngine.Random.insideUnitCircle * worldSize;
 
             Vector2 randomDiraction = new Vector2(
-                Random.Range(-1, 2),
-                Random.Range(-1, 2)
+                UnityEngine.Random.Range(-1, 2),
+                UnityEngine.Random.Range(-1, 2)
             );
             randomDiraction = randomDiraction == Vector2.zero ? Vector2.one : randomDiraction;
 
@@ -110,14 +111,16 @@ public class CrowdSimulationController : MonoBehaviour
                 Mathf.Floor(newPosition.y / 6)
             );
 
+            var currentColor = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+
             agents[i] = new CrowdAgent
             {
                 position = newPosition,
                 velocity = randomDiraction,
-                target = Random.insideUnitCircle * worldSize,
+                target = UnityEngine.Random.insideUnitCircle * worldSize,
                 gridPosition = gridPosition,
-                teamColor = Color.blue,
-                maxSpeed = Random.Range(2f, 4f)
+                teamColor = new float4(currentColor.r, currentColor.g, currentColor.b, currentColor.a),
+                maxSpeed = UnityEngine.Random.Range(2f, 4f)
             };
         }
 
@@ -132,6 +135,6 @@ partial struct CrowdAgent
     public Vector2 velocity;
     public Vector2 target;
     public Vector2 gridPosition;
-    public Color teamColor;
+    public float4 teamColor;
     public float maxSpeed;
 }
