@@ -108,8 +108,9 @@ public class BoidFlock : MonoBehaviour
 
     /// <summary>
     /// Rotates the _currentBoid towards its velocity direction.
+    /// NOT MY CODE (forgot to note down credits).
     /// </summary>
-    private void SetRotation() // NOT MY CODE (forgot to note down credits)
+    private void SetRotation()
     {
         Vector3 diff = (_currentBoid.Position + _currentBoid.Velocity) - _currentBoid.Position;
         diff.Normalize();

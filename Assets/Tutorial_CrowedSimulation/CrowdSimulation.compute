@@ -1,0 +1,42 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel MoveAgents
+
+struct CrowdAgent
+{
+    float2 position;
+    float2 velocity;
+    float2 target;
+    float maxSpeed;
+};
+
+RWStructuredBuffer<CrowdAgent> agents;
+
+int agentCount;
+float deltaTime;
+
+[numthreads(256, 1, 1)]
+void MoveAgents(uint3 id : SV_DispatchThreadID)
+{
+    int index = id.x;
+    
+    if (index >= agentCount) return;
+    
+    CrowdAgent agent = agents[index];
+    
+    float2 toTarget = agent.target - agent.position;
+    float distance = length(toTarget);
+    
+    if (distance > 0.1)
+    {
+        float2 desired = normalize(toTarget) * agent.maxSpeed;
+        agent.velocity = lerp(agent.velocity, desired, 0.05);
+    }
+    else
+    {
+        agent.velocity - float2(0.0, 0.0);
+    }
+    
+    agent.position += agent.velocity * deltaTime;
+    
+    agents[index] = agent;
+};
