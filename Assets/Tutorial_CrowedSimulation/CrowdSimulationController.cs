@@ -111,7 +111,8 @@ public class CrowdSimulationController : MonoBehaviour
                 Mathf.Floor(newPosition.y / 6)
             );
 
-            var currentColor = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            //var currentColor = UnityEngine.Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
+            var currentColor = Color.white;
 
             agents[i] = new CrowdAgent
             {

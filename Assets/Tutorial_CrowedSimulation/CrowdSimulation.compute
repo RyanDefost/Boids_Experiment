@@ -52,6 +52,7 @@ void Logic()
             avoidCenter += (agent.position - otherAgent.position);
                                                                     //DOESNT SEEM TO WORK
             agent.teamColor = otherAgent.teamColor;                 //OTHER COLORS DON'T IGNORE EACHOTHER!
+            
             continue;
         }
         

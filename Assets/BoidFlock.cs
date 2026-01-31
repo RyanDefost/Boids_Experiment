@@ -87,10 +87,9 @@ public class BoidFlock : MonoBehaviour
 
             // Set random start direction.
             Vector2 randomDiraction = new Vector2(
-                Random.Range(-1, 2),
-                Random.Range(-1, 2)
+                Random.Range(0, 2) * 2 - 1, // returns
+                Random.Range(0, 2) * 2 - 1  // 1 or -1
             );
-            randomDiraction = randomDiraction == Vector2.zero ? Vector2.one : randomDiraction;
 
             // Set random color.
             Color color = randomPosition.y > 0 ? Color.blue : Color.yellow;

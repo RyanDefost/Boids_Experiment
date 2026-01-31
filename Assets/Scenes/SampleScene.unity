@@ -654,14 +654,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bef09a481a0fae4b8ec337f249c7a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _boidAmount: 10
-  _outerBounds: {x: 40, y: 30}
+  _boidAmount: 1000
+  _outerBounds: {x: 50, y: 50}
   _gridSize: 6
   _cohesionFactor: 0.0005
-  _avoidanceFactor: 0.1
-  _alignmentFactor: 0.1
+  _avoidanceFactor: 0.5
+  _alignmentFactor: 0.05
   _turnFactor: 0.1
-  _maxSpeed: 1
+  _maxSpeed: 5
   _minSpeed: 1
   _minDistance: 1
   _maxDistance: 5
@@ -832,12 +832,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dfcc41fd7c8b6304694aa8cfd724b1d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentCount: 10000
-  worldSize: 100
+  agentCount: 20000
+  worldSize: 150
   _cohesionFactor: 0.0005
   _alignmentFactor: 0.1
   _avoidanceFactor: 0.1
-  _outerBounds: {x: 100, y: 100}
+  _outerBounds: {x: 150, y: 150}
   agentMesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
   agentMaterial: {fileID: 2100000, guid: bda1d85491248424fb594f2c6699e2ad, type: 2}
   crowdShader: {fileID: 7200000, guid: d095780406ad73f4d9761bdc66e25658, type: 3}
