@@ -25,7 +25,7 @@ public class ArmController : MonoBehaviour
         anchorPosition = anchorObject.transform.position;
         //_targetPosition = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        if (Vector2.Distance(anchorPosition, _targetPosition) > 3)
+        if (Vector2.Distance(anchorPosition, _targetPosition) > 5)
         {
             _targetPosition = endObject.transform.position;
         }
