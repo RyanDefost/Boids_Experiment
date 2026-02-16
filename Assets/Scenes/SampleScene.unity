@@ -654,7 +654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8bef09a481a0fae4b8ec337f249c7a5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _boidAmount: 1000
+  _boidAmount: 1
   _outerBounds: {x: 50, y: 50}
   _gridSize: 6
   _cohesionFactor: 0.0005
@@ -663,9 +663,10 @@ MonoBehaviour:
   _turnFactor: 0.1
   _maxSpeed: 5
   _minSpeed: 1
-  _minDistance: 1
+  _minDistance: 2
   _maxDistance: 5
   _sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+  _prefab: {fileID: 1121023451225384996, guid: 23e461d28f56a94978c2e4d1fd7d5a26, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -910,7 +911,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!50 &1153693846
 Rigidbody2D:
   serializedVersion: 4

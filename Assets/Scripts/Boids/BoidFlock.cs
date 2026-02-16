@@ -24,6 +24,7 @@ public class BoidFlock : MonoBehaviour
 
     [Space]
     [SerializeField] private Sprite _sprite;
+    [SerializeField] private GameObject _prefab;
 
     private Boid[] _boids;
     private Boid _currentBoid;
@@ -38,7 +39,7 @@ public class BoidFlock : MonoBehaviour
     {
         foreach (Boid agent in _boids)
         {
-            Destroy(agent.GameObject);
+            Destroy(agent.bGameObject);
         }
         _boids = null;
     }
@@ -54,8 +55,8 @@ public class BoidFlock : MonoBehaviour
             CheckBounds();
             AvoidObstacles();
 
-            _currentBoid.GameObject.transform.position += (Vector3)_currentBoid.Velocity * _currentBoid.Speed * Time.deltaTime;
-            _currentBoid.Position = _currentBoid.GameObject.transform.position;
+            _currentBoid.bGameObject.transform.position += (Vector3)_currentBoid.Velocity * _currentBoid.Speed * Time.deltaTime;
+            _currentBoid.Position = _currentBoid.bGameObject.transform.position;
 
             SetRotation();
 
@@ -94,12 +95,14 @@ public class BoidFlock : MonoBehaviour
             // Set random color.
             Color color = randomPosition.y > 0 ? Color.blue : Color.yellow;
 
+            GameObject currentPrefab = GameObject.Instantiate(_prefab);
+
             // CREATE BOID.
             _boids[i] = new Boid(
                 randomPosition,
                 _gridSize,
                 color, //Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f),
-                _sprite,
+                currentPrefab,
                 randomDiraction
             );
         }
@@ -114,7 +117,7 @@ public class BoidFlock : MonoBehaviour
         Vector3 diff = (_currentBoid.Position + _currentBoid.Velocity) - _currentBoid.Position;
         diff.Normalize();
         float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-        _currentBoid.GameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
+        _currentBoid.bGameObject.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);
     }
 
     /// <summary>
@@ -141,7 +144,7 @@ public class BoidFlock : MonoBehaviour
                 avoidCenter += (_currentBoid.Position - boid.Position);
 
                 _currentBoid.TeamColor = boid.TeamColor;
-                _currentBoid.Renderer.color = _currentBoid.TeamColor;
+                //_currentBoid.Renderer.color = _currentBoid.TeamColor;
 
                 continue;
             }

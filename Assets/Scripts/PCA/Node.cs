@@ -1,31 +1,25 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.Rendering;
 using UnityEngine;
 
-public class Node : MonoBehaviour
+public struct Node
 {
-    public Vector2 _position = Vector2.zero;
-    private float _radius = 0.5f;
-
-    //public Node ConnectedNode;
+    public Vector2 Position;
+    public float Radius;
 
 
-    // Start is called before the first frame update
-    void Start()
+    public Node(Vector2 position, float radius)
     {
-        _position = transform.position;
+        Position = position;
+        Radius = radius;
     }
 
-    public void SetPosition(Node ConnectedNode)
+    public void SetPosition(Node otherNode)
     {
-        var diraction = new Vector2(
-            _position.x - ConnectedNode._position.x,
-            _position.y - ConnectedNode._position.y
-            ).normalized;
+        Vector2 diraction = new Vector2(
+            Position.x - otherNode.Position.x,
+            Position.y - otherNode.Position.y
+        ).normalized;
 
-        var ConnectionPosition = diraction * _radius;
-        _position = ConnectionPosition + (Vector2)ConnectedNode._position;
+        Vector2 correctedPosition = diraction * Radius;
+        Position = correctedPosition + otherNode.Position;
     }
 }
